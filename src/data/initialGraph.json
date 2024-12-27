@@ -1,0 +1,145 @@
+{
+  "nodes": [
+    {
+      "id": "1",
+      "label": "觉醒与冲击",
+      "title": "AI的觉醒与社会冲击",
+      "attributes": {
+        "summary": "作者通过个人经历揭示了AI技术的飞速发展给个人和社会带来的深刻影响，以及随之而来的焦虑和兴奋。",
+        "keywords": ["AI", "社会影响", "个人体验"],
+        "cases": ["ChatGPT的启示"],
+        "highlight": "我相信真正了解AI的代价至少是三个不眠之夜。"
+      }
+    },
+    {
+      "id": "2",
+      "label": "技术根基与挑战",
+      "title": "AI的技术根基与伦理挑战",
+      "attributes": {
+        "summary": "深入探讨了AI的技术发展历史、当前的技术水平，以及伴随技术进步而来的伦理和对齐问题。",
+        "keywords": ["技术发展", "伦理", "对齐"],
+        "cases": ["机械土耳其人", "图灵测试"],
+        "highlight": "我们对机器能够思考的迷恋可以追溯到1770年。"
+      }
+    },
+    {
+      "id": "2-1",
+      "label": "历史脉络",
+      "title": "AI的历史脉络",
+      "attributes": {
+        "summary": "回顾了AI的发展历程，从早期的机械土耳其人到现代的AI技术，展现了AI技术的演变。",
+        "keywords": ["历史", "技术演变", "AI"],
+        "cases": ["机械土耳其人"],
+        "highlight": "我们对机器能够思考的迷恋可以追溯到1770年。"
+      }
+    },
+    {
+      "id": "2-2",
+      "label": "伦理边界",
+      "title": "AI的伦理边界",
+      "attributes": {
+        "summary": "分析了AI发展中的伦理问题，特别是如何确保AI的行为与人类的价值观保持一致。",
+        "keywords": ["伦理", "价值观", "对齐"],
+        "cases": ["Clippy"],
+        "highlight": "AI对齐研究者试图找出如何设计符合人类价值观的AI系统。"
+      }
+    },
+    {
+      "id": "3",
+      "label": "实践应用与影响",
+      "title": "AI的实践应用与社会影响",
+      "attributes": {
+        "summary": "探讨了AI在不同领域的应用，以及这些应用对社会和个人的影响，特别是在教育和创意产业中。",
+        "keywords": ["应用", "社会影响", "创意产业"],
+        "cases": ["AI作为教师", "AI艺术创作"],
+        "highlight": "AI在创意工作中展现出人类般的行为。"
+      }
+    },
+    {
+      "id": "3-1",
+      "label": "教育革命",
+      "title": "AI与教育革命",
+      "attributes": {
+        "summary": "分析了AI如何改变教育方式，特别是在个性化学习和教学上的应用。",
+        "keywords": ["教育", "个性化学习", "AI"],
+        "cases": ["AI作为教师"],
+        "highlight": "AI能够做出与人类相似的道德判断。"
+      }
+    },
+    {
+      "id": "3-2",
+      "label": "创意激发",
+      "title": "AI与创意激发",
+      "attributes": {
+        "summary": "探讨了AI在艺术和创意产业中的应用，以及它如何激发新的创意和表达方式。",
+        "keywords": ["创意", "艺术", "AI"],
+        "cases": ["AI艺术创作"],
+        "highlight": "AI在创意工作中展现出人类般的行为。"
+      }
+    },
+    {
+      "id": "3-3",
+      "label": "工作重塑",
+      "title": "AI与工作重塑",
+      "attributes": {
+        "summary": "讨论了AI如何成为人类的工作伙伴，以及这种合作如何重塑工作的本质和效率。",
+        "keywords": ["合作", "工作效率", "AI"],
+        "cases": ["AI在咨询工作中的应用"],
+        "highlight": "AI与人合作可以提高工作效率和创新能力。"
+      }
+    },
+    {
+      "id": "4",
+      "label": "未来展望与责任",
+      "title": "AI的未来展望与社会责任",
+      "attributes": {
+        "summary": "在结语中，作者总结了AI的发展趋势及其对未来社会的影响，强调了人类在AI时代的重要性和社会责任。",
+        "keywords": ["未来", "社会责任", "发展"],
+        "cases": ["AI的伦理和法律问题"],
+        "highlight": "今天的决策将影响未来几代人。"
+      }
+    }
+  ],
+  "links": [
+    {
+      "source": "1",
+      "target": "2",
+      "relation": "引发"
+    },
+    {
+      "source": "2",
+      "target": "2-1",
+      "relation": "包含"
+    },
+    {
+      "source": "2",
+      "target": "2-2",
+      "relation": "包含"
+    },
+    {
+      "source": "2",
+      "target": "3",
+      "relation": "过渡"
+    },
+    {
+      "source": "3",
+      "target": "3-1",
+      "relation": "包含"
+    },
+    {
+      "source": "3",
+      "target": "3-2",
+      "relation": "包含"
+    },
+    {
+      "source": "3",
+      "target": "3-3",
+      "relation": "包含"
+    },
+    {
+      "source": "3",
+      "target": "4",
+      "relation": "导向"
+    }
+  ]
+} 
