@@ -2,18 +2,46 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import styles from './KnowledgeGraph.module.css';
 
-const KnowledgeGraph = ({ graphData, onNodeSelect, selectedNode }) => {
+const KnowledgeGraph = ({ graphData, onNodeSelect, selectedNode, onQuestionSelect }) => {
   const svgRef = useRef();
   const [tooltip, setTooltip] = useState({ show: false, content: '', x: 0, y: 0 });
   const [popup, setPopup] = useState({ show: false, content: '', title: '', type: '' });
   const zoomRef = useRef(null);
+  const [questionPopup, setQuestionPopup] = useState({
+    show: false,
+    questions: [],
+    x: 0,
+    y: 0
+  });
 
   // 创建按钮组
   const createNodeButtons = (node, x, y) => {
     const buttons = [
-      { label: 'K', type: 'keywords', title: '关键词', color: '#FF7875' },  // 红色
-      { label: 'C', type: 'cases', title: '案例', color: '#52C41A' },      // 绿色
-      { label: 'H', type: 'highlight', title: '金句', color: '#1890FF' }   // 蓝色
+      {
+        label: 'K',
+        type: 'keywords',
+        title: '关键词',
+        color: '#FF7875',
+        getContent: (node) => Array.isArray(node.attributes.keywords) ?
+          node.attributes.keywords.join('、') :
+          node.attributes.keywords || '暂无关键词'
+      },
+      {
+        label: 'C',
+        type: 'cases',
+        title: '案例',
+        color: '#52C41A',
+        getContent: (node) => Array.isArray(node.attributes.cases) ?
+          node.attributes.cases.join('\n\n') :
+          node.attributes.cases || '暂无案例'
+      },
+      {
+        label: 'H',
+        type: 'highlight',
+        title: '金句',
+        color: '#1890FF',
+        getContent: (node) => node.attributes.highlight || '暂无金句'
+      }
     ];
 
     return buttons.map((btn, index) => ({
@@ -22,16 +50,9 @@ const KnowledgeGraph = ({ graphData, onNodeSelect, selectedNode }) => {
       ...btn,
       onClick: (event) => {
         event.stopPropagation();
-        let content = '';
-        if (Array.isArray(node.attributes[btn.type])) {
-          content = node.attributes[btn.type].join('、');
-        } else {
-          content = node.attributes[btn.type];
-        }
-        console.log('Button clicked:', { title: btn.title, content });
         setPopup({
           show: true,
-          content,
+          content: btn.getContent(node),
           title: btn.title,
           type: btn.type,
           x: event.clientX,
@@ -42,7 +63,7 @@ const KnowledgeGraph = ({ graphData, onNodeSelect, selectedNode }) => {
   };
 
   useEffect(() => {
-    console.log('Graph Data:', graphData);
+    console.log('Graph Data Updated:', graphData);
     if (!graphData?.nodes?.length) {
       console.log('No nodes found in graph data');
       return;
@@ -52,6 +73,7 @@ const KnowledgeGraph = ({ graphData, onNodeSelect, selectedNode }) => {
     const width = container.clientWidth;
     const height = container.clientHeight;
 
+    // 清除现有的图谱并创建新的 SVG
     const svg = d3.select(svgRef.current)
       .attr('width', width)
       .attr('height', height);
@@ -59,7 +81,7 @@ const KnowledgeGraph = ({ graphData, onNodeSelect, selectedNode }) => {
     svg.selectAll('*').remove();
 
     const g = svg.append('g');
-    
+
     // 创建缩放行为
     const zoom = d3.zoom()
       .scaleExtent([0.2, 3])
@@ -93,7 +115,7 @@ const KnowledgeGraph = ({ graphData, onNodeSelect, selectedNode }) => {
         .distance(200))
       .force('charge', d3.forceManyBody().strength(-1000))
       .force('center', d3.forceCenter(width / 2, height / 2))
-      .force('collision', d3.forceCollide().radius(d => 
+      .force('collision', d3.forceCollide().radius(d =>
         d.id.length === 1 ? 80 : 60
       ));
 
@@ -140,8 +162,9 @@ const KnowledgeGraph = ({ graphData, onNodeSelect, selectedNode }) => {
         .on('end', dragEnded));
 
     // 为一级节点添加圆形，为二级节点添加矩形
-    node.each(function(d) {
+    node.each(function (d) {
       const nodeGroup = d3.select(this);
+
       if (d.id.length === 1) {
         // 一级节点使用圆形
         nodeGroup.append('circle')
@@ -149,7 +172,7 @@ const KnowledgeGraph = ({ graphData, onNodeSelect, selectedNode }) => {
           .style('fill', '#ffffff')
           .style('stroke', d => d.id === selectedNode?.id ? '#ff4d4f' : '#0066cc')
           .style('stroke-width', d => d.id === selectedNode?.id ? 4 : 3)
-          .style('filter', d => 
+          .style('filter', d =>
             d.id === selectedNode?.id
               ? 'drop-shadow(0 6px 12px rgba(255, 77, 79, 0.2))'
               : 'drop-shadow(0 6px 8px rgba(0, 0, 0, 0.15))'
@@ -165,7 +188,7 @@ const KnowledgeGraph = ({ graphData, onNodeSelect, selectedNode }) => {
           .style('fill', '#ffffff')
           .style('stroke', d => d.id === selectedNode?.id ? '#ff4d4f' : '#0066cc')
           .style('stroke-width', d => d.id === selectedNode?.id ? 3 : 2)
-          .style('filter', d => 
+          .style('filter', d =>
             d.id === selectedNode?.id
               ? 'drop-shadow(0 4px 8px rgba(255, 77, 79, 0.2))'
               : 'drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1))'
@@ -176,21 +199,22 @@ const KnowledgeGraph = ({ graphData, onNodeSelect, selectedNode }) => {
       nodeGroup.append('text')
         .text(d => d.label)
         .attr('text-anchor', 'middle')
-        .attr('dy', d.id.length === 1 ? '0.35em' : '0em')  // 调整文本垂直位置
+        .attr('dominant-baseline', 'middle')
+        .attr('dy', '0em')
         .style('fill', '#333')
         .style('font-size', d.id.length === 1 ? '14px' : '12px')
         .style('font-weight', d.id.length === 1 ? '600' : '500')
         .style('pointer-events', 'none')
-        .style('text-shadow', '0 0 3px white, 0 0 3px white, 0 0 3px white')  // 添加文本阴影提高可读性
-        .call(wrap, 70);  // 文本自动换行
+        .style('text-shadow', '0 0 3px white, 0 0 3px white, 0 0 3px white')
+        .call(wrap, 70);
     });
 
     // 添加文本换行函数
     function wrap(text, width) {
-      text.each(function() {
+      text.each(function () {
         const text = d3.select(this);
         const words = text.text().split(/\s+/).reverse();
-        const lineHeight = 1.1; // ems
+        const lineHeight = 1.1;
         const y = text.attr("y");
         const dy = parseFloat(text.attr("dy"));
         let word;
@@ -215,6 +239,14 @@ const KnowledgeGraph = ({ graphData, onNodeSelect, selectedNode }) => {
               .text(word);
           }
         }
+
+        // 计算文本总高度并调整位置以实现垂直居中
+        const textHeight = (lineNumber * lineHeight + 1) * 1.1;
+        text.selectAll('tspan')
+          .attr('dy', function (d, i) {
+            const offset = -textHeight / 2 + i * lineHeight + dy;
+            return offset + "em";
+          });
       });
     }
 
@@ -222,31 +254,54 @@ const KnowledgeGraph = ({ graphData, onNodeSelect, selectedNode }) => {
     node.on('click', (event, d) => {
       if (onNodeSelect) {
         onNodeSelect(d);
+
+        // 显示问题弹窗
+        if (d.attributes.question) {
+          setQuestionPopup({
+            show: true,
+            questions: d.attributes.question,
+            x: event.pageX,
+            y: event.pageY
+          });
+        }
       }
     })
-    .on('mouseover', (event, d) => {
-      setTooltip({
-        show: true,
-        content: d.attributes.summary,
-        x: event.pageX,
-        y: event.pageY
+      .on('mouseover', (event, d) => {
+        setTooltip({
+          show: true,
+          content: d.attributes.summary,
+          x: event.pageX,
+          y: event.pageY
+        });
+      })
+      .on('mouseout', () => {
+        setTooltip({ show: false, content: '', x: 0, y: 0 });
       });
-    })
-    .on('mouseout', () => {
-      setTooltip({ show: false, content: '', x: 0, y: 0 });
-    });
 
     // 添加节点按钮
-    node.each(function(d) {
+    node.each(function (d) {
       const nodeGroup = d3.select(this);
       const buttons = createNodeButtons(d, 0, 0);
-      
+
       buttons.forEach(btn => {
         const buttonGroup = nodeGroup.append('g')
           .style('cursor', 'pointer')
-          .on('click', function(event) {
+          .on('click', function (event) {
             event.stopPropagation();
             btn.onClick(event);
+          })
+          .on('mouseover', function (event) {
+            event.stopPropagation();
+            setTooltip({
+              show: true,
+              content: btn.getContent(d),
+              x: event.pageX,
+              y: event.pageY
+            });
+          })
+          .on('mouseout', function (event) {
+            event.stopPropagation();
+            setTooltip({ show: false, content: '', x: 0, y: 0 });
           });
 
         buttonGroup.append('circle')
@@ -333,21 +388,21 @@ const KnowledgeGraph = ({ graphData, onNodeSelect, selectedNode }) => {
   // 计算弹窗位置和方向
   const calculatePopupPosition = () => {
     if (!popup.show) return {};
-    
+
     const margin = 20;  // 与按钮的间距
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
-    
+
     let x = popup.x;
     let y = popup.y;
     let direction = '';
-    
+
     // 根据点击位置计算最佳显示方向
     const spaceRight = viewportWidth - popup.x;
     const spaceLeft = popup.x;
     const spaceTop = popup.y;
     const spaceBottom = viewportHeight - popup.y;
-    
+
     if (spaceRight >= 320) {  // 弹窗宽度 + margin
       x += margin;
       direction = 'Left';
@@ -361,7 +416,7 @@ const KnowledgeGraph = ({ graphData, onNodeSelect, selectedNode }) => {
       y -= margin;
       direction = 'Bottom';
     }
-    
+
     return {
       left: x,
       top: y,
@@ -373,7 +428,7 @@ const KnowledgeGraph = ({ graphData, onNodeSelect, selectedNode }) => {
   const handleZoom = (type) => {
     const svg = d3.select(svgRef.current);
     const zoom = zoomRef.current;
-    
+
     if (!zoom) return;
 
     switch (type) {
@@ -412,12 +467,12 @@ const KnowledgeGraph = ({ graphData, onNodeSelect, selectedNode }) => {
         </div>
       </div>
       <svg ref={svgRef}></svg>
-      
+
       {/* Tooltip for summary */}
       {tooltip.show && (
-        <div 
+        <div
           className={styles.tooltip}
-          style={{ 
+          style={{
             left: tooltip.x + 10,
             top: tooltip.y + 10
           }}
@@ -430,7 +485,7 @@ const KnowledgeGraph = ({ graphData, onNodeSelect, selectedNode }) => {
       {popup.show && (
         <>
           <div className={styles.overlay} onClick={() => setPopup({ show: false })} />
-          <div 
+          <div
             {...calculatePopupPosition()}
             style={{
               left: popup.x,
@@ -439,7 +494,7 @@ const KnowledgeGraph = ({ graphData, onNodeSelect, selectedNode }) => {
           >
             <div className={styles.popupHeader}>
               <h3>{popup.title}</h3>
-              <button 
+              <button
                 className={styles.closeButton}
                 onClick={() => setPopup({ show: false })}
               >
@@ -452,23 +507,62 @@ const KnowledgeGraph = ({ graphData, onNodeSelect, selectedNode }) => {
           </div>
         </>
       )}
+
+      {/* 问题弹窗 */}
+      {questionPopup.show && (
+        <>
+          <div className={styles.overlay} onClick={() => setQuestionPopup({ show: false })} />
+          <div
+            className={styles.questionPopup}
+            style={{
+              left: questionPopup.x + 10,
+              top: questionPopup.y + 10
+            }}
+          >
+            <div className={styles.questionPopupHeader}>
+              <h3>探讨问题</h3>
+              <button
+                className={styles.closeButton}
+                onClick={() => setQuestionPopup({ show: false })}
+              >
+                ×
+              </button>
+            </div>
+            <div className={styles.questionList}>
+              {questionPopup.questions.map((question, index) => (
+                <button
+                  key={index}
+                  className={styles.questionButton}
+                  onClick={() => {
+                    onQuestionSelect(question);
+                    setQuestionPopup({ show: false });
+                  }}
+                >
+                  {question}
+                </button>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+
       <div className={styles.zoomHint}>
         使用触控板双指缩放或 Cmd +/- 调整大小 • 双击重置视图
       </div>
       <div className={styles.zoomControls}>
-        <button 
+        <button
           className={styles.zoomButton}
           onClick={() => handleZoom('in')}
         >
           +
         </button>
-        <button 
+        <button
           className={styles.zoomButton}
           onClick={() => handleZoom('out')}
         >
           -
         </button>
-        <button 
+        <button
           className={styles.zoomButton}
           onClick={() => handleZoom('reset')}
         >
