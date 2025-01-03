@@ -54,7 +54,7 @@ jobs:
       - name: 'Login via Azure CLI'
         uses: azure/login@v1
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          creds: ${{ secrets.GRAPHREAD}}
           auth-type: SERVICE_PRINCIPAL
 
       - name: "Deploy to Azure Web App"
