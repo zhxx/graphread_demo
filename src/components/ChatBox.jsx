@@ -28,50 +28,52 @@ const ChatBox = forwardRef(({ selectedNode, graphData, onGraphUpdate, isFirstInt
     setMessages(prev => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
-
+    console.log('Sending request to Dify:', input);
     try {
-      const response = await fetch('https://api.dify.ai/v1/chat-messages', {
+      const response = await fetch('https://api.dify.ai/v1/workflows/run', {
         method: 'POST',
         headers: {
-          'Authorization': 'Bearer app-UIYKBEEOpNk3KKlwv2diyWS8',
+          'Authorization': 'Bearer app-OTatgvfBNrDdbyPIUWBtmlEf',
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           inputs: {
             node: selectedNode ? JSON.stringify(selectedNode) : "",
-            query: input,
+            user_query: input,
             outline: isFirstInteraction ? JSON.stringify(initialGraph) : JSON.stringify(graphData)
           },
-          query: input,
+          // query: input,
           response_mode: "blocking",
-          conversation_id: "",
+          // conversation_id: "",
           user: "user"
         })
       });
 
       const data = await response.json();
+      console.log('Dify response:', data);
+      if (data?.data?.outputs) {
+        const { json: graph, text: displayText } = data.data.outputs;
+        console.log('=====>>>>>', JSON.parse(graph), displayText);
+        // try {
+        //   const parsedResponse = JSON.parse(data.answer);
 
-      if (data.answer) {
-        try {
-          const parsedResponse = JSON.parse(data.answer);
+        //   // 提取纯文本内容
+        //   let displayText = parsedResponse.text;
 
-          // 提取纯文本内容
-          let displayText = parsedResponse.text;
+        //   // 找到第一个 { 或 [ 的位置，只保留之前的文本
+        //   const jsonStartIndex = Math.min(
+        //     displayText.indexOf('{') !== -1 ? displayText.indexOf('{') : Infinity,
+        //     displayText.indexOf('[') !== -1 ? displayText.indexOf('[') : Infinity
+        //   );
 
-          // 找到第一个 { 或 [ 的位置，只保留之前的文本
-          const jsonStartIndex = Math.min(
-            displayText.indexOf('{') !== -1 ? displayText.indexOf('{') : Infinity,
-            displayText.indexOf('[') !== -1 ? displayText.indexOf('[') : Infinity
-          );
+        //   if (jsonStartIndex !== Infinity) {
+        //     displayText = displayText.substring(0, jsonStartIndex);
+        //   }
 
-          if (jsonStartIndex !== Infinity) {
-            displayText = displayText.substring(0, jsonStartIndex);
-          }
+        //   // 最终清理
+        //   displayText = displayText.trim();
 
-          // 最终清理
-          displayText = displayText.trim();
-
-          // 只在有实际文本内容时显示
+        //   // 只在有实际文本内容时显示
           if (displayText) {
             const assistantMessage = {
               type: 'assistant',
@@ -80,32 +82,32 @@ const ChatBox = forwardRef(({ selectedNode, graphData, onGraphUpdate, isFirstInt
             setMessages(prev => [...prev, assistantMessage]);
           }
 
-          // 更新图谱
-          if (parsedResponse.graph) {
-            onGraphUpdate(parsedResponse.graph);
-          }
-        } catch (e) {
-          // 如果解析失败，尝试同样的方法处理原始响应
-          let displayText = data.answer;
-          const jsonStartIndex = Math.min(
-            displayText.indexOf('{') !== -1 ? displayText.indexOf('{') : Infinity,
-            displayText.indexOf('[') !== -1 ? displayText.indexOf('[') : Infinity
-          );
+        //   // 更新图谱
+          // if (graph) {
+          //   onGraphUpdate(graph);
+          // }
+        // } catch (e) {
+        //   // 如果解析失败，尝试同样的方法处理原始响应
+        //   let displayText = data.answer;
+        //   const jsonStartIndex = Math.min(
+        //     displayText.indexOf('{') !== -1 ? displayText.indexOf('{') : Infinity,
+        //     displayText.indexOf('[') !== -1 ? displayText.indexOf('[') : Infinity
+        //   );
 
-          if (jsonStartIndex !== Infinity) {
-            displayText = displayText.substring(0, jsonStartIndex);
-          }
+        //   if (jsonStartIndex !== Infinity) {
+        //     displayText = displayText.substring(0, jsonStartIndex);
+        //   }
 
-          displayText = displayText.trim();
+        //   displayText = displayText.trim();
 
-          if (displayText) {
-            const assistantMessage = {
-              type: 'assistant',
-              content: displayText
-            };
-            setMessages(prev => [...prev, assistantMessage]);
-          }
-        }
+        //   if (displayText) {
+        //     const assistantMessage = {
+        //       type: 'assistant',
+        //       content: displayText
+        //     };
+        //     setMessages(prev => [...prev, assistantMessage]);
+        //   }
+        // }
       }
     } catch (error) {
       console.error('Error calling Dify API:', error);
@@ -134,7 +136,7 @@ const ChatBox = forwardRef(({ selectedNode, graphData, onGraphUpdate, isFirstInt
       const response = await fetch('https://api.dify.ai/v1/chat-messages', {
         method: 'POST',
         headers: {
-          'Authorization': 'Bearer app-UIYKBEEOpNk3KKlwv2diyWS8',
+          'Authorization': 'Bearer app-OTatgvfBNrDdbyPIUWBtmlEf', //
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
