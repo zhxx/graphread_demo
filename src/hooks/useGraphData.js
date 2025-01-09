@@ -18,12 +18,14 @@ export const useGraphData = () => {
 
   const updateGraph = (newGraphData) => {
     try {
-      if (typeof newGraphData === 'string') {
-        newGraphData = JSON.parse(newGraphData);
+      const newGraph = {
+        nodes: [...currentGraph.nodes, ...newGraphData.nodes],
+        links: [...currentGraph.links, ...newGraphData.links]
       }
-      setCurrentGraph(newGraphData);
-      localStorage.setItem('graphData', JSON.stringify(newGraphData));
+      setCurrentGraph(newGraph);
+      localStorage.setItem('graphData', JSON.stringify(newGraph));
       setIsFirstInteraction(false);
+      console.log('Graph updated:', newGraph);
     } catch (error) {
       console.error('Error updating graph:', error);
     }
