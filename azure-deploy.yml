@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - staging # 如果需要支持其他分支
 
 jobs:
   build:
@@ -16,13 +17,19 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '22' # 或根据项目需要更改 Node.js 版本
+        node-version: '20' # 推荐使用稳定的长期支持版本
 
     - name: Install dependencies
       run: npm install
+      working-directory: ./ # 如果项目有子目录，例如 ./frontend，请更新路径
+
+    - name: Run tests # 可选步骤，确保代码通过测试
+      run: npm test
+      working-directory: ./ # 根据项目结构设置工作目录
 
     - name: Build project
-      run: npm run build # 如果没有 build 脚本，可以跳过此步骤
+      run: npm run build # 如果没有 build 脚本，请删除此步骤
+      working-directory: ./ # 根据项目结构设置工作目录
 
   deploy:
     runs-on: ubuntu-latest
@@ -33,5 +40,4 @@ jobs:
       uses: azure/webapps-deploy@v2
       with:
         app-name: Graphread
-        slot-name: Production
         publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
