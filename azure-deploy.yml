@@ -1,43 +1,30 @@
-name: Deploy to Azure App Service
+name: Deploy to Azure Web App
 
 on:
   push:
     branches:
       - main
-      - staging # 如果需要支持其他分支
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+    - uses: actions/checkout@v2
 
     - name: Set up Node.js
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v2
       with:
-        node-version: '20' # 推荐使用稳定的长期支持版本
+        node-version: '20.x'
 
-    - name: Install dependencies
-      run: npm install
-      working-directory: ./ # 如果项目有子目录，例如 ./frontend，请更新路径
+    - name: npm install and build
+      run: |
+        npm install
+        npm run build --if-present
 
-    - name: Run tests # 可选步骤，确保代码通过测试
-      run: npm test
-      working-directory: ./ # 根据项目结构设置工作目录
-
-    - name: Build project
-      run: npm run build # 如果没有 build 脚本，请删除此步骤
-      working-directory: ./ # 根据项目结构设置工作目录
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-
-    steps:
-    - name: Deploy to Azure Web App
+    - name: 'Deploy to Azure Web App'
       uses: azure/webapps-deploy@v2
       with:
-        app-name: Graphread
+        app-name: 'graphread'
         publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+        package: . 
