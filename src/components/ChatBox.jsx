@@ -47,9 +47,9 @@ const ChatBox = forwardRef(
             inputs: {
               node: selectedNode ? JSON.stringify(selectedNode) : "",
               user_query: input,
-              outline: isFirstInteraction
-                ? JSON.stringify(initialGraph)
-                : JSON.stringify(graphData),
+              outline: graphData
+                ? JSON.stringify(graphData)
+                : JSON.stringify(initialGraph),
             },
             response_mode: "blocking",
             user: "user",
@@ -107,9 +107,9 @@ const ChatBox = forwardRef(
             inputs: {
               node: selectedNode ? JSON.stringify(selectedNode) : "",
               user_query: question,
-              outline: isFirstInteraction
-                ? JSON.stringify(initialGraph)
-                : JSON.stringify(graphData),
+              outline: graphData
+                ? JSON.stringify(graphData)
+                : JSON.stringify(initialGraph),
             },
             response_mode: "blocking",
             user: "user",
